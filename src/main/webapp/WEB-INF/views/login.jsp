@@ -7,17 +7,47 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.0/dist/js.cookie.min.js"></script>
 <html>
 <head>
     <jsp:include page="layouts/head.jsp"/>
     <title>Title</title>
     <script type="text/javascript">
         $(document).ready(function (){
+            fn_err();
+            fn_remember();
+
+        });
+
+        function fn_err(){
             let msg = "${errorMessage}";
             if(msg && msg.length){
                 alert(msg);
             }
-        });
+        }
+
+        function fn_remember(){
+            if(Cookies.get("USER_ID")){
+                $("input[name=remember]").prop("checked", true);
+                $("input[name=userId]").val(Cookies.get("USER_ID"));
+            }
+
+            $("input[name=remember]").click(function (){
+               if($("input[name=remember]").is(':checked')){
+                   if(joins.nullCheck($("input[name=userId]").val().trim())){
+                       alert('아이디를 입력해주세요.');
+                       $("input[name=remember]").prop("checked", false);
+                   }else {
+                       Cookies.set("USER_ID", $("input[name=userId]").val().trim(), {expires : 7 });
+                       console.log(Cookies.get("USER_ID"));
+                   }
+               }else if(!$("input[name=remember]").is(':checked')){
+                   Cookies.remove("USER_ID");
+               }
+            });
+        }
+
+
 
     </script>
 </head>
@@ -43,11 +73,18 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="checkbox" name="remember-me" /> Remember Me
+                    <input type="checkbox" name="remember" /> Remember Me
                 </div>
                 <button type="submit" class="btn btn-lg btn-primary btn-block">로그인</button>
                 <!--                <button type="submit" onclick="formLogin()" id="formbtn" class="btn btn-lg btn-primary btn-block">로그인</button>-->
             </form>
+
+            <div class="panel">
+                <button type="button" name="btnFindId" class="btn  btn-warning">아이디찾기</button>
+                <button type="button" name="btnFindPW" class="btn  btn-danger">비밀번호찾기</button>
+            </div>
+
+
         </div>
     </div>
 </div>
