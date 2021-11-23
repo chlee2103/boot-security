@@ -1,9 +1,14 @@
 package com.ex.boot.user.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class UserInfo {
     private long seq;
