@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ex.boot.user.mapper.UserMapper">
+    <select id="findByUser" parameterType="string" resultType="UserDetail">
+        SELECT  /* UserMapper.findByUser */
+                user_id
+              , user_pw
+              , authorize
+        FROM    ds_user
+        WHERE   user_id = #{userId}
+          AND     dlt_yn = 'N'
+          AND     is_off = 'N'
+    </select>
+
+    <insert id="saveByUser" parameterType="UserInfo">
+        INSERT INTO ds_user(user_id
+                          , user_pw
+                          , user_name
+                          , user_nick
+                          , user_phone
+                          , authorize)
+        VALUES (#{userId}
+               , #{userPw}
+               , #{userName}
+               , #{userNick}
+               , #{userPhone}
+               , #{authorize})
+    </insert>
+</mapper>
