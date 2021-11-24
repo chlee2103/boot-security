@@ -5,6 +5,7 @@ import com.ex.boot.user.model.UserDetail;
 import com.ex.boot.user.model.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -49,6 +50,29 @@ public class UserService implements UserDetailsService {
             userMapper.saveByUser(userInfo);
             resultMap.put("code", "200");
         }
+        return resultMap;
+    }
+
+    public String findById(UserInfo userInfo){
+        return userMapper.findById(userInfo);
+    }
+
+
+    public int findByPwCount(UserInfo userInfo){
+        return userMapper.findByPwCount(userInfo);
+    }
+
+    public Map<String,String> updateByPw(UserInfo userInfo){
+        userInfo.setUserPw(passwordEncoder.encode(userInfo.getUserPw()));
+        int count = userMapper.updateByPw(userInfo);
+        Map<String,String> resultMap = new HashMap<>();
+        if(count == 0){
+            resultMap.put("code", "100");
+            resultMap.put("message", "비밀번호 변경이 실패했습니다.");
+            return resultMap;
+        }
+        resultMap.put("code", "200");
+        resultMap.put("message", "비밀번호가 변경되었습니다.");
         return resultMap;
     }
 

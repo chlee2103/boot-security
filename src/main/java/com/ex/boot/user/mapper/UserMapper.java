@@ -9,4 +9,7 @@ public interface UserMapper {
     UserDetail findByUser(String userId);
     int saveByUser(UserInfo userInfo);
     int findByUserCount(String userId);
+    String findById(UserInfo userInfo);
+    int findByPwCount(UserInfo userInfo);
+    int updateByPw(UserInfo userInfo);
 }

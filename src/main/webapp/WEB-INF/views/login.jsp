@@ -17,6 +17,12 @@
             fn_err();
             fn_remember();
 
+            $("[name=btnFindId]").click(function (){
+               location.href="/findId";
+            });
+            $("[name=btnFindPw]").click(function (){
+                location.href="/findPw";
+            });
         });
 
         function fn_err(){
@@ -81,7 +87,7 @@
 
             <div class="panel">
                 <button type="button" name="btnFindId" class="btn  btn-warning">아이디찾기</button>
-                <button type="button" name="btnFindPW" class="btn  btn-danger">비밀번호찾기</button>
+                <button type="button" name="btnFindPw" class="btn  btn-danger">비밀번호찾기</button>
             </div>
 
 

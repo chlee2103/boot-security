@@ -3,6 +3,7 @@ package com.ex.boot.user.controller;
 import com.ex.boot.user.model.UserInfo;
 import com.ex.boot.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -59,4 +60,40 @@ public class UserController {
         }
         return mav;
     }
+
+
+    @GetMapping( "/findId")
+    public String findId(){
+        return "/member/findId";
+    }
+
+    @ResponseBody
+    @PostMapping("/findIdAf")
+    public String findIdAf(@RequestBody UserInfo userInfo){
+        log.info("{}", userInfo);
+        String id = userService.findById(userInfo);
+        log.info(id);
+        return id;
+    }
+
+    @GetMapping( "/findPw")
+    public String findPw(){
+        return "/member/findPw";
+    }
+
+    @ResponseBody
+    @PostMapping("/findPwAf")
+    public int findPwAf(@RequestBody UserInfo userInfo){
+        log.info("{}", userInfo);
+        return userService.findByPwCount(userInfo);
+    }
+
+
+    @ResponseBody
+    @PostMapping("/pwReset")
+    public Map<String, String> findPwAf1(@RequestBody UserInfo userInfo){
+        log.info("{}", userInfo);
+        return userService.updateByPw(userInfo);
+    }
+
 }

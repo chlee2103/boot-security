@@ -17,13 +17,13 @@
                 if(joins.idCheck($("#userId").val())){
                     alert('아이디는 영대소문+숫자 조합 4자 이상입니다.');
                 }else if(joins.lenCheck($("#userName").val())){
-                    alert("이름은 2글자 이상입니다.")
+                    alert("이름은 2글자 이상입니다.");
                 }else if(joins.lenCheck($("#userNick").val())){
-                    alert("닉네임은 2글자 이상입니다.")
+                    alert("닉네임은 2글자 이상입니다.");
                 }else if(joins.passwordCheck($("#userPw").val())){
                     alert("비밀번호는 영문/숫자/특수문자 조합 10자 이상입니다.");
                 }else if($("#userPw").val() != $("#pwCheck").val()){
-                    alert("비밀번호와 재입력이 같아야 합니다.")
+                    alert("비밀번호와 재입력이 같아야 합니다.");
                 }else if(joins.nullCheck($("#userPhone").val())) {
                     alert("전화번호를 입력해주세요.");
                 }else {
@@ -45,7 +45,7 @@
                             alert("이미 가입된 아이디입니다.");
                             return
                         }else if(response.code == "200"){
-                            location.href="../../..";
+                            location.href="/";
                         }
                     }, (jqXhr)=> {
                         console.log(jqXhr);
