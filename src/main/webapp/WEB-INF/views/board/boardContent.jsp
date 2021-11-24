@@ -9,16 +9,23 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-
+<script>
+    function fn_movePage(page){
+        $("#pageNo").val((page-1)*10);
+        fn_content();
+    }
+</script>
 
 
 
 <div class="container">
+    총게시글 수 : <c:out value="${page.totalCount}"/>
     <table class="table">
         <thead>
         <tr>
             <th>번호</th>
             <th>제목</th>
+            <th>작성자</th>
             <th>게시일</th>
             <th>조회수</th>
         </tr>
@@ -26,7 +33,7 @@
         <tbody>
         <c:if test="${empty boardList}">
             <tr>
-                <th colspan="4">등록된 게시글이 없습니다.</th>
+                <th colspan="5">등록된 게시글이 없습니다.</th>
             </tr>
         </c:if>
         <c:if test="${not empty boardList}">
@@ -34,6 +41,7 @@
                 <tr>
                     <td><c:out value="${board.rnum}"/></td>
                     <td><c:out value="${board.boardTitle}"/></td>
+                    <td><c:out value="${board.regId}"/></td>
                     <td><c:out value="${board.regDtm}"/></td>
                     <td><c:out value="${board.readCount}"/></td>
                 </tr>
@@ -41,4 +49,21 @@
         </c:if>
         </tbody>
     </table>
+    <div class="text-center">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="javascript:fn_movePage(${page.pageNo-1})">Previous</a></li>
+            <c:forEach begin="${page.firstPageNo}" end="${page.lastPageNo}" step="1" var="i">
+                <c:choose>
+                    <c:when test="${i eq page.pageNo}">
+                        <li class="page page_num"><a href="javascript:;" class="btn_paging"><strong>${i}</strong></a></li>
+                    </c:when>
+                    <c:otherwise>
+                        <li class="page page_num"><a href="javascript:fn_movePage(${i})" class="btn_paging">${i}</a></li>
+                    </c:otherwise>
+                </c:choose>
+            </c:forEach>
+            <li class="page-item"><a class="page-link" href="javascript:fn_movePage(${page.pageNo+1})">Next</a></li>
+
+        </ul>
+    </div>
 </div>

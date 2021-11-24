@@ -2,11 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ex.boot.board.mapper.BoardMapper">
     <sql id="pagingBtm">
-    LIMIT #{pageSize}  -- 데이터갯수
-    OFFSET (#{pageNo}-1) * #{pageSize}  -- 몇번째부터 조회
+    LIMIT #{pageNo}, #{pageSize}
     </sql>
 
-    <select id="getBoardList" resultType="BoardInfo">
+    <select id="getBoardList" parameterType="BoardInfo" resultType="BoardInfo">
         SELECT
                a.board_title
              , DATE_FORMAT(a.reg_dtm, '%Y/%m/%d') AS reg_dtm
@@ -15,19 +14,25 @@
              , @row_num:= @row_num + 1 AS rnum          /* row_num을 가져와서 1씩 증가시킨다 --->  := (대입연산자) */
         FROM ds_board AS a, (SELECT @row_num := 0) AS b /* SELECT @row_num := 0 == row_num이라는 변수에 0을 set해 준다. */
         ORDER BY reg_dtm DESC
+        <include refid="pagingBtm"/>
     </select>
 
-    <insert id="saveByBoard" parameterType="java.util.List">
+    <select id="getBoardTotalCount" parameterType="BoardInfo" resultType="int">
+        SELECT
+            COUNT(*)         /* row_num을 가져와서 1씩 증가시킨다 --->  := (대입연산자) */
+        FROM ds_board       /* SELECT @row_num := 0 == row_num이라는 변수에 0을 set해 준다. */
+
+    </select>
+
+    <insert id="saveByBoard" parameterType="BoardInfo">
         INSERT INTO ds_board(reg_id
                             , board_title
                             , board_content)
         VALUES
-               <foreach collection="list" separator=" , " item="item">
-
-               (#{item.regId}
+                ( #{item.regId}
                 , #{item.boardTitle}
                 , #{item.boardContent})
-               </foreach>
+
 
     </insert>
 </mapper>

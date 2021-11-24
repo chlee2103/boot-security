@@ -40,9 +40,11 @@ public class BoardController {
      * @return
      */
     @PostMapping("/boardContent")
-    public String boardContent(Model model){
-        List<BoardInfo> boardList = boardService.getBoardList();
-        log.info("{}", boardList);
+    public String boardContent(Model model, BoardInfo boardInfo){
+        List<BoardInfo> boardList = boardService.getBoardList(boardInfo);
+        int totalCount = boardService.getBoardTotalCount(boardInfo);
+        boardInfo.setTotalCount(totalCount);
+        model.addAttribute("page", boardInfo);
         model.addAttribute("boardList", boardList);
         return "/board/boardContent";
     }
@@ -62,11 +64,6 @@ public class BoardController {
     public ModelAndView boardDetail(Principal principal){
         ModelAndView mav = new ModelAndView("/board/boardDetail");
         mav.addObject("principal", principal);
-        List<BoardInfo> list = new ArrayList<>();
-        for (int i = 1; i<100; i++){
-            BoardInfo boardInfo = new BoardInfo(0, "테스트"+i, "test", null, null, null, null, null, 0, 0);
-            list.add(boardInfo);
-        }
         return mav;
     }
 

@@ -17,7 +17,16 @@ public class BoardService {
         this.boardMapper = boardMapper;
     }
 
-    public List<BoardInfo> getBoardList(){ return boardMapper.getBoardList(); }
+    public List<BoardInfo> getBoardList(BoardInfo boardInfo){
+        /*if(boardInfo.getPageNo() > 0 ){
+            boardInfo.setPageNo(boardInfo.getPageNo() * 10);
+        }*/
+
+        return boardMapper.getBoardList(boardInfo); }
+
+    public int getBoardTotalCount(BoardInfo boardInfo){
+        return boardMapper.getBoardTotalCount(boardInfo);
+    }
 
     public Map<String, String> saveByBoard(BoardInfo boardInfo) {
         Map<String, String> resultMap = new HashMap<>();

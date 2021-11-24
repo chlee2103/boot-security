@@ -141,9 +141,9 @@ Controller에서 Model 짐싸기서 view로 가야함
 
 
 @ToString
-@Getter
 @Setter
-public class PageNation implements Serializable {
+@Getter
+public class PageNation2 implements Serializable {
 
     private int pageSize;   // 한 페이지에 보여줄 게시글 수
     private int pageBlock;  // 페이징 네비[블록] 사이즈 ex) << < 1 2 3 4 5 6 7 8 9 10 > >>
@@ -162,18 +162,15 @@ public class PageNation implements Serializable {
     // 필요에 따라 search 변수 등록
 
     // @Setter를 했어도 오버라이딩 가능
-    public void setTotalCount(int totalCount){
+    private void setTotalCount(int totalCount){
         this.totalCount = totalCount;
         this.makePaging();
     }
 
-
     private void makePaging(){
         // 기본값 설정 (들어오는 값이 없을 경우)
         if(this.totalCount == 0) return;
-        if(this.pageNo == 0) this.setPageNo(0);        // 기본페이지 번호
-        if(this.pageNo > 0) this.setPageNo(this.pageNo*10);
-
+        if(this.pageNo == 0) this.setPageNo(1);        // 기본페이지 번호
         if(this.pageSize == 0) this.setPageSize(10);   // 기본 페이지 리스트 사이즈
         if(this.pageBlock == 0) this.setPageBlock(10); // 기본 페이지 네비[블록] 사이즈
 

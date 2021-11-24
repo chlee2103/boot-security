@@ -19,9 +19,14 @@
         });
 
         function fn_content(){
+            let data = {
+                pageSize : $("#pageSize").val(),
+                pageNo : $("#pageNo").val()
+            }
             $.ajax({
                 url:"/board/boardContent",
                 type:"POST",
+                data: data,
                 dataType:"html",
                 success:function (data){
                     $("#boardContentArea").html(data);
@@ -45,6 +50,8 @@
 
 
     <div id="boardContentArea"></div>
+    <input type="hidden" id="pageNo" value="0">
+    <input type="hidden" id="pageSize" value="10">
     <div class="form-group">
         <div class="col-sm-offset-1 col-sm-13">
             <button type="button" class="btn btn-lg btn-success float-right" id="btnWrite">글쓰기</button>

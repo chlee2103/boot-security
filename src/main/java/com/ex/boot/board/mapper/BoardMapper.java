@@ -7,7 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface BoardMapper {
-    List<BoardInfo> getBoardList();
-
+    List<BoardInfo> getBoardList(BoardInfo boardInfo);
+    int getBoardTotalCount(BoardInfo boardInfo);
     int saveByBoard(BoardInfo boardInfo);
 }
