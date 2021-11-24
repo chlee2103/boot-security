@@ -1,0 +1,381 @@
+package com.ex.boot.test;
+
+import com.lgensol.admin.common.upload.storge.StorageException;
+import com.lgensol.admin.service.model.UseInfo;
+import com.lgensol.admin.service.service.ServiceService;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
+import org.apache.poi.poifs.crypt.EncryptionInfo;
+import org.apache.poi.poifs.crypt.EncryptionMode;
+import org.apache.poi.poifs.crypt.Encryptor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Controller
+public class ExcelTest {
+
+    // application.properties에 설정한 것 : excel.temp.path
+    @Value("${excel.temp.path}")
+    private String tempPath;
+
+    protected transient Logger log = LoggerFactory.getLogger(this.getClass());
+
+    // Row 옵션
+    // transient는 Serialize하는 과정에 제외하고 싶은 경우 선언
+    // 패스워드와 같은 보안정보가 직렬화(Serialize) 과정에서 제외하고 싶은 경우에 적용
+    private transient int firstLine;
+    // HSSFWorkbook 객체는 .xls 파일만을 지원
+    private final HSSFWorkbook workbook = new HSSFWorkbook();
+    // workbook.createSheet("sheet") 인자로 주어진 "sheet"이 엑셀 파일의 시트 이름이 된다.
+    private HSSFSheet sheet = workbook.createSheet("sheet");
+    private HSSFRow row;
+
+    //xls 엑셀로 작성
+    private transient XSSFCellStyle passwordStyleTitle;
+    private transient XSSFCellStyle passwordStyleContent;
+
+    private ServiceService service;
+    public ExcelTest(ServiceService service) {
+        this.service = service;
+    }
+
+    /**
+     * 엑셀 다운로드
+     * @param request
+     * @param response
+     * @param useInfo
+     * @throws Exception
+     */
+
+    @RequestMapping("/service/excelDown")
+    public void excelDown(HttpServletRequest request, HttpServletResponse response, UseInfo useInfo) throws Exception{
+
+        String [] excelItem = {
+                "아이디:userId:8000",
+                "이름:userName:8000",
+                "배터리팩 ID:vehicleId:8000",
+                "모델명:carClassNm:3000",
+                "연식:yearType:3000",
+                "배터리상태:bttrSt:3000",
+                "SoH:soh:3000",
+                "OBD 등록 여부:OBDYN:3000",
+                "OBD 상태:vehicleStCode:3000",
+                "신청일:vehicleRqstDtm:3000",
+                "상시진단서비스:CAREYN:3000",
+                "인증서서비스:serviceName:3000"
+        };
+
+        //디렉토리
+        long currentTime = System.currentTimeMillis();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        String uploadDate = simpleDateFormat.format(currentTime);
+        String downFile = "SERVICE_USE_"+uploadDate;
+
+        excelPasswordDown(request, response, service.selectUseInfoList(useInfo), true, downFile, excelItem, useInfo.getExcelPassword(), tempPath);
+    }
+
+    public void excelPasswordDown(HttpServletRequest request, HttpServletResponse response, List<?> list, Boolean option, String excelFileName, String[] excelItem, String password, String tempPath) throws IOException{
+        // 서버에 저장 할 파일명
+        long currentTime =  System.currentTimeMillis();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
+        Path path = Paths.get(tempPath);
+        log.info("path : " + path.toString());
+        try {
+            if(!Files.exists(path)){
+                Files.createDirectories(path);
+            }
+        }catch(IOException e) {
+            throw new StorageException("Could not initialize storage", e);
+        }
+
+        String newFile = path.toString()+File.separator+simpleDateFormat.format(currentTime) + "_" + (int) (Math.random() * 100000) + ".xlsx"; // 파일명
+        log.info("newFile : " + newFile);
+        log.info("filePath : " + path.toString()+File.separator+newFile);
+
+        File file = new File(newFile);
+        try {
+            file.createNewFile();
+            OutputStream fileOut = new FileOutputStream(file);
+
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet();
+            // 로우를 하나 생성
+            Row row = sheet.createRow(0);
+
+            String titleFont = HSSFFont.FONT_ARIAL;
+            String contentFont = HSSFFont.FONT_ARIAL;
+
+            setfirstLine(0);
+
+            String[] excelRowName = new String[excelItem.length];
+            String[] excelMapKey = new String[excelItem.length];
+            Integer[] colSize = new Integer[excelItem.length];
+
+            for(int i = 0; i < excelItem.length; i++){
+                String[] item = excelItem[i].split(":"); // ex  아이디:userId:8000
+                excelRowName[i] = item[0];                     // 아이디
+                excelMapKey[i] = item[1];                      // userId
+                colSize[i] = Integer.parseInt(item[2]);        // 8000
+
+            }
+
+            // 폰트 스타일 생성
+            XSSFFont titlefont = workbook.createFont();
+            titlefont.setFontName(titleFont);
+            titlefont.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+
+            //노말 Font 설정.
+            XSSFFont font = workbook.createFont();
+            font.setFontName(contentFont);
+            font.setColor(HSSFColor.HSSFColorPredefined.BLACK.getIndex());
+
+            //제목의 스타일 지정
+            getPasswordNormalTitle(workbook);
+            passwordStyleTitle.setFont(titlefont);
+
+            //노말 스타일 지정
+            getPasswordNormalContent(workbook);
+
+            // 필드 길이 설정
+            for(int i = 0; i < excelRowName.length; i++){
+                if(option){
+                    sheet.setColumnWidth(i, colSize[i]);
+                }else{
+                    sheet.setColumnWidth(i, 5000);
+                }
+            }
+
+            //Row 생성
+            row = sheet.createRow(firstLine);
+            for(int i = 0; i < excelRowName.length;i++){
+                row.createCell(i).setCellValue(excelRowName[i]); // Cell에 값 넣기
+                row.getCell(i).setCellStyle(passwordStyleTitle);
+            }
+
+            HashMap<String, Object> listMap = new HashMap<String, Object>();
+            for (int i = 0; i < list.size(); i++) {
+                row = sheet.createRow(i+1+firstLine);
+
+                listMap = convertObjectToMap(list.get(i));
+
+                Iterator<String> it = listMap.keySet().iterator();
+                while(it.hasNext()){
+                    it.next();
+                    for(int cellCount = 0;cellCount < excelMapKey.length; cellCount++){
+
+                        // 2021-05-03
+                        if (excelMapKey[cellCount].indexOf("NO@") > -1 ) {
+                            row.createCell(cellCount).setCellValue(String.valueOf(excelMapKey[cellCount].replaceAll("NO@", "")));
+                        } else if (excelMapKey[cellCount].indexOf("DATE@") > -1 ) {
+                            String data = excelMapKey[cellCount].replaceAll("DATE@", "");
+
+                            if (listMap.get(data) == null || listMap.get(data).equals("null") || listMap.get(data).equals("")) {
+                                row.createCell(cellCount).setCellValue(String.valueOf(listMap.get(excelMapKey[cellCount])).replaceAll("null", ""));
+                            } else {
+                                Date date = (Date)listMap.get(data);
+                                SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA);
+                                String convertData = transFormat.format(date);
+                                row.createCell(cellCount).setCellValue(convertData);
+                            }
+                        } else if (excelMapKey[cellCount].indexOf("AMT@") > -1 ) {
+                            DecimalFormat decimalFormat = new DecimalFormat("###,###");
+                            String data = excelMapKey[cellCount].replaceAll("AMT@", "");
+
+                            if (listMap.get(data) == null || listMap.get(data).equals("null") || listMap.get(data).equals("")) {
+                                row.createCell(cellCount).setCellValue(String.valueOf(listMap.get(excelMapKey[cellCount])).replaceAll("null", ""));
+                            } else {
+                                String convertData = decimalFormat.format(listMap.get(data));
+                                row.createCell(cellCount).setCellValue(convertData);
+                            }
+                        } else {
+                            row.createCell(cellCount).setCellValue(String.valueOf(listMap.get(excelMapKey[cellCount])).replaceAll("null", ""));
+                        }
+                        row.getCell(cellCount).setCellStyle(passwordStyleContent); // setCellStyle Cell에 스타일 적용
+                    }
+                }
+            }
+
+            workbook.write(fileOut);
+            workbook.close();
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try (POIFSFileSystem fs = new POIFSFileSystem()) {
+            EncryptionInfo info = new EncryptionInfo(EncryptionMode.agile);
+
+            Encryptor enc = info.getEncryptor();
+            enc.confirmPassword(password);
+
+            try (OPCPackage opc = OPCPackage.open(file, PackageAccess.READ_WRITE);
+                 OutputStream os = enc.getDataStream(fs)) {
+                opc.save(os);
+            } catch (InvalidFormatException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (GeneralSecurityException e1) {
+                e1.printStackTrace();
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fs.writeFilesystem(fos);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e2) {
+            e2.printStackTrace();
+        }
+        System.out.println("Excel file exported");
+
+        file = new File(newFile);
+
+        if (file.exists() && file.isFile()) {
+            response.setContentType("application/octet-stream; charset=utf-8");
+            response.setContentLength((int) file.length());
+            String browser = getBrowser(request);
+            String disposition = getDisposition(excelFileName+".xlsx", browser);
+            response.setHeader("Content-Disposition", disposition);
+            response.setHeader("Content-Transfer-Encoding", "binary");
+            OutputStream out = response.getOutputStream();
+            FileInputStream fis = null;
+            fis = new FileInputStream(file);
+            FileCopyUtils.copy(fis, out);
+            if (fis != null)
+                fis.close();
+            out.flush();
+            out.close();
+
+            file.delete();
+        }
+    }
+
+    private void getPasswordNormalTitle(XSSFWorkbook workbook){
+
+        passwordStyleTitle = workbook.createCellStyle();
+        passwordStyleTitle.setAlignment(HorizontalAlignment.CENTER);
+        passwordStyleTitle.setVerticalAlignment(VerticalAlignment.CENTER);
+        passwordStyleTitle.setFillForegroundColor(HSSFColor.HSSFColorPredefined.GREY_25_PERCENT.getIndex()); //색상
+        passwordStyleTitle.setFillPattern(passwordStyleTitle.getFillPatternEnum().SOLID_FOREGROUND);
+        passwordStyleTitle.setVerticalAlignment(VerticalAlignment.CENTER);
+        passwordStyleTitle.setBorderTop(BorderStyle.THIN);
+        passwordStyleTitle.setBorderBottom(BorderStyle.THIN);
+        passwordStyleTitle.setBorderLeft(BorderStyle.THIN);
+        passwordStyleTitle.setBorderRight(BorderStyle.THIN);
+    }
+    private void getPasswordNormalContent(XSSFWorkbook workbook){
+
+        passwordStyleContent = workbook.createCellStyle();
+        passwordStyleContent.setAlignment(HorizontalAlignment.CENTER);
+        passwordStyleContent.setVerticalAlignment(VerticalAlignment.CENTER);
+        passwordStyleContent.setBorderTop(BorderStyle.THIN);
+        passwordStyleContent.setBorderBottom(BorderStyle.THIN);
+        passwordStyleContent.setBorderLeft(BorderStyle.THIN);
+        passwordStyleContent.setBorderRight(BorderStyle.THIN);
+    }
+
+
+    public HashMap<String, Object> convertObjectToMap(Object obj){
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Field[] fields = obj.getClass().getDeclaredFields();
+        for(int i=0; i <fields.length; i++){
+            fields[i].setAccessible(true);
+            try{
+                map.put(fields[i].getName(), fields[i].get(obj));
+            }catch(Exception e){
+                log.error("== ExcelUtil.convertObjectToMap ERROR : ", e.getMessage(), e);
+            }
+        }
+        return map;
+    }
+
+    private String getBrowser(HttpServletRequest request) {
+        String header = request.getHeader("User-Agent");
+        if (header.indexOf("MSIE") > -1 || header.indexOf("Trident") > -1)
+            return "MSIE";
+        else if (header.indexOf("Chrome") > -1)
+            return "Chrome";
+        else if (header.indexOf("Opera") > -1)
+            return "Opera";
+        return "Firefox";
+    }
+
+    private String getDisposition(String filename, String browser)
+            throws UnsupportedEncodingException {
+        String dispositionPrefix = "attachment;filename=";
+        String encodedFilename = null;
+        if (browser.equals("MSIE")) {
+            encodedFilename = URLEncoder.encode(filename, "UTF-8").replaceAll(
+                    "\\+", "%20");
+        } else if (browser.equals("Firefox")) {
+            encodedFilename = "\""
+                    + new String(filename.getBytes("UTF-8"), "8859_1") + "\"";
+        } else if (browser.equals("Opera")) {
+            encodedFilename = "\""
+                    + new String(filename.getBytes("UTF-8"), "8859_1") + "\"";
+        } else if (browser.equals("Chrome")) {
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < filename.length(); i++) {
+                char c = filename.charAt(i);
+                if (c > '~') {
+                    sb.append(URLEncoder.encode("" + c, "UTF-8"));
+                } else {
+                    sb.append(c);
+                }
+            }
+            encodedFilename = sb.toString();
+        }
+        return dispositionPrefix + encodedFilename;
+    }
+
+    public HSSFWorkbook getWorkbook(){
+        return this.workbook;
+    }
+
+    public void setfirstLine(int firstLine) {
+        this.firstLine = firstLine;
+    }
+
+    public HSSFRow getRow() {
+        return row;
+    }
+
+    public void setRow(HSSFRow row) {
+        this.row = row;
+    }
+
+    public HSSFSheet getSheet() {
+        return sheet;
+    }
+
+    public void setSheet(HSSFSheet sheet) {
+        this.sheet = sheet;
+    }
+}

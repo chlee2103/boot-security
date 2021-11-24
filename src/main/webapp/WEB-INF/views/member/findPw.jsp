@@ -70,7 +70,7 @@
                     userNick : $("#userNick").val(),
                     userPw : $("#userPw").val(),
                 };
-
+                // 콜백함수  : 함수를 파라미터로 넣어서 함수안에서 실행된다.
                 commons.ajaxCall("pwReset", data, "POST", ()=>{},
                     (response)=>{
                         alert(response.message);

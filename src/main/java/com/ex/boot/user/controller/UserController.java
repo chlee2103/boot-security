@@ -23,7 +23,7 @@ public class UserController {
     }
 
     /**
-     * 회원가입
+     * 회원가입 이동
      * @return
      */
     @GetMapping("/save")
@@ -61,12 +61,18 @@ public class UserController {
         return mav;
     }
 
-
+    /**
+     * 아이디 찾기 이동
+     * @return
+     */
     @GetMapping( "/findId")
-    public String findId(){
-        return "/member/findId";
-    }
+    public String findId(){ return "/member/findId"; }
 
+    /**
+     * 아이디 찾기
+     * @param userInfo
+     * @return
+     */
     @ResponseBody
     @PostMapping("/findIdAf")
     public String findIdAf(@RequestBody UserInfo userInfo){
@@ -76,11 +82,18 @@ public class UserController {
         return id;
     }
 
+    /**
+     * 비밀번호 재설정 이동
+     * @return
+     */
     @GetMapping( "/findPw")
-    public String findPw(){
-        return "/member/findPw";
-    }
+    public String findPw(){ return "/member/findPw"; }
 
+    /**
+     * 비밀번호 재설정 : 유저정보 확인
+     * @param userInfo
+     * @return
+     */
     @ResponseBody
     @PostMapping("/findPwAf")
     public int findPwAf(@RequestBody UserInfo userInfo){
@@ -88,7 +101,11 @@ public class UserController {
         return userService.findByPwCount(userInfo);
     }
 
-
+    /**
+     * 비밀번호 재설정
+     * @param userInfo
+     * @return
+     */
     @ResponseBody
     @PostMapping("/pwReset")
     public Map<String, String> findPwAf1(@RequestBody UserInfo userInfo){

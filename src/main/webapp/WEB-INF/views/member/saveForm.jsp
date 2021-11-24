@@ -58,16 +58,7 @@
 <body>
 <jsp:include page="../layouts/top.jsp"/>
 <div class="container">
-    <div class="header">
-        <nav>
-            <ul class="nav nav-pills pull-right">
-                <li role="presentation" class="active"><a href="/member">Member</a></li>
-                <li role="presentation"><a href="/community">커뮤니티</a></li>
-                <li role="presentation"><a href="/myroom">마이룸</a></li>
-            </ul>
-        </nav>
-        <h3 class="text-muted"><a href="/">MeetMe</a></h3>
-    </div>
+    <jsp:include page="../layouts/navi.jsp"/>
 
     <div class="jumbotron">
         <div class="tbl_wrp">
