@@ -18,10 +18,6 @@ public class BoardService {
     }
 
     public List<BoardInfo> getBoardList(BoardInfo boardInfo){
-        /*if(boardInfo.getPageNo() > 0 ){
-            boardInfo.setPageNo(boardInfo.getPageNo() * 10);
-        }*/
-
         return boardMapper.getBoardList(boardInfo); }
 
     public int getBoardTotalCount(BoardInfo boardInfo){
@@ -40,5 +36,10 @@ public class BoardService {
             resultMap.put("message", "글작성이 완료되었습니다.");
         }
         return resultMap;
+    }
+
+    public BoardInfo getBoard (int boardSeq){
+        boardMapper.updateReadCount(boardSeq);
+        return boardMapper.getBoard(boardSeq);
     }
 }

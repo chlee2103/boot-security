@@ -3,6 +3,7 @@ package com.ex.boot.common.paging;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
@@ -139,7 +140,7 @@ Controller에서 Model 짐싸기서 view로 가야함
 
  */
 
-
+@Slf4j
 @ToString
 @Getter
 @Setter
@@ -148,8 +149,9 @@ public class PageNation implements Serializable {
     private int pageSize;   // 한 페이지에 보여줄 게시글 수
     private int pageBlock;  // 페이징 네비[블록] 사이즈 ex) << < 1 2 3 4 5 6 7 8 9 10 > >>
     private int pageNo;     // 페이지 번호
-    private int startRowNo; // 조회 시작 row 번호
-    private int endRowNo;   // 조회 마지막 row 번호
+
+    private int startNo;
+
     private int firstPageNo;// 첫 페이지 번호
     private int lastPageNo; // 마지막 페이지 번호
     private int prevPageNo; // 이전 페이지 번호
@@ -169,49 +171,49 @@ public class PageNation implements Serializable {
 
 
     private void makePaging(){
+        log.info("pageNo : {}", this.pageNo);
         // 기본값 설정 (들어오는 값이 없을 경우)
-        if(this.totalCount == 0) return;
-        if(this.pageNo == 0) this.setPageNo(0);        // 기본페이지 번호
-        if(this.pageNo > 0) this.setPageNo(this.pageNo*10);
+        if (this.totalCount == 0) return;
 
-        if(this.pageSize == 0) this.setPageSize(10);   // 기본 페이지 리스트 사이즈
-        if(this.pageBlock == 0) this.setPageBlock(10); // 기본 페이지 네비[블록] 사이즈
+        if (this.pageNo == 1) {
+            this.startNo = 0;
+        }
+        else {
+            this.startNo = (this.pageNo - 1) * 10;
+        }
 
         // [첫 페이지], [마지막 페이지] 계산
-        int finalPage = (totalCount + (pageSize -1)) / pageSize; // 마지막 페이지 사이즈 ?? 1이 부족한듯?
-        this.setFirstPageNo(1);
-        this.setLastPageNo(finalPage);
+        int finalPage = this.totalCount / this.pageSize;
+        finalPage = (this.totalCount % this.pageSize) == 0 ? finalPage : finalPage + 1;
+        this.firstPageNo = 1;
+        this.lastPageNo = finalPage;
 
         // [이전], [다음]
-        if(pageNo == 1){
-            this.setPrevPageNo(1); // pageNo가 1일 경우 < 이것도 1
+        this.prevPageNo = ((this.pageNo - 1) < 1 ? 1 : (this.pageNo - 1)); // pageNo - 1가 0일 경우 1이고 아니면 pageNo - 1
+
+        if(this.pageNo == finalPage){ // 페이지넘버가 마지막페이지와 같은경우
+            this.nextPageNo = this.firstPageNo; // > 는 1이 되라
         }else{
-            this.setPrevPageNo(((pageNo - 1) < 1 ? 1 : (pageNo - 1))); // pageNo - 1가 0일 경우 1이고 아니면 pageNo - 1
+            this.nextPageNo = (this.pageNo + 1) > finalPage ? this.firstPageNo : (this.pageNo + 1); // pageNo + 1가 finalPage보다 크면 ...
         }
 
-        if(pageNo == finalPage){
-            this.setNextPageNo(firstPageNo);
-        }else{
-            this.setNextPageNo(((pageNo + 1) > finalPage ? firstPageNo : (pageNo + 1))); // pageNo + 1가 finalPage보다 크면 ...
-        }
+
+        if (this.pageBlock == 0) this.pageBlock = 3; // 기본 페이지 네비[블록] 사이즈
 
         // 페이징 네비[블록] 계산
-        int startPage = ((pageNo -1) / pageBlock) * pageBlock + 1; // 시작 페이지 (페이징 네비 기준)
-        int endPage = startPage + pageBlock - 1;
+        int startPage = ((this.pageNo -1) / this.pageBlock) * this.pageBlock + 1; // 시작 페이지 (페이징 네비 기준)
+        int endPage = startPage + this.pageBlock - 1;
 
         // 페이징 네비가 만약 [20-30]인데 마지막 페이지가 28인 경우
         // [29, 30]은 미노출 해야한다.
         if(endPage > finalPage){
            endPage = finalPage;
         }
-        this.setStartPageNo(startPage); // 시작 페이지 (페이징 네비 기준)
-        this.setEndPageNo(endPage);     // 끝 페이지 (페이징 네비 기준)
+        this.startPageNo = startPage; // 시작 페이지 (페이징 네비 기준)
+        this.endPageNo = endPage;     // 끝 페이지 (페이징 네비 기준)
 
-        // 조회 시작 row, 마지막 row 계산
-        int startRowNo = ((pageNo - 1) * pageSize) + 1;
-        int endRowNo = pageNo * pageSize;
-        setStartRowNo(startRowNo);
-        setEndPageNo(endRowNo);
+
+
 
     }
 }

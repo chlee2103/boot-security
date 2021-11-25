@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,28 +40,23 @@ public class BoardController {
      */
     @PostMapping("/boardContent")
     public String boardContent(Model model, BoardInfo boardInfo){
-        List<BoardInfo> boardList = boardService.getBoardList(boardInfo);
         int totalCount = boardService.getBoardTotalCount(boardInfo);
         boardInfo.setTotalCount(totalCount);
+
+        List<BoardInfo> boardList = boardService.getBoardList(boardInfo);
+
         model.addAttribute("page", boardInfo);
         model.addAttribute("boardList", boardList);
         return "/board/boardContent";
     }
 
-/*    @GetMapping("/boardDetail")
-    public ModelAndView boardDetail(BoardInfo boardInfo){
-        ModelAndView mav = new ModelAndView("/board/boardDetail");
-        log.info("{}", boardInfo);
-*//*        if(StringUtils.isEmpty(String.valueOf(boardInfo.getBoardSeq()))){
-
-            return mav;
-        }*//*
-
-        return mav;
-    }*/
     @GetMapping("/boardDetail")
-    public ModelAndView boardDetail(Principal principal){
+    public ModelAndView boardDetail(Principal principal, Integer boardSeq){
         ModelAndView mav = new ModelAndView("/board/boardDetail");
+        if(boardSeq != null || (!boardSeq.equals(""))){
+            BoardInfo boardInfo = boardService.getBoard(boardSeq);
+            mav.addObject("boardInfo", boardInfo);
+        }
         mav.addObject("principal", principal);
         return mav;
     }

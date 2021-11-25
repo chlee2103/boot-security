@@ -2,18 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ex.boot.board.mapper.BoardMapper">
     <sql id="pagingBtm">
-    LIMIT #{pageNo}, #{pageSize}
+    LIMIT #{startNo}, #{pageSize}
     </sql>
 
     <select id="getBoardList" parameterType="BoardInfo" resultType="BoardInfo">
         SELECT
-               a.board_title
+               a.board_seq
+             , a.board_title
              , DATE_FORMAT(a.reg_dtm, '%Y/%m/%d') AS reg_dtm
              , a.read_count
              , a.reg_id
              , @row_num:= @row_num + 1 AS rnum          /* row_num을 가져와서 1씩 증가시킨다 --->  := (대입연산자) */
         FROM ds_board AS a, (SELECT @row_num := 0) AS b /* SELECT @row_num := 0 == row_num이라는 변수에 0을 set해 준다. */
-        ORDER BY reg_dtm DESC
+        ORDER BY a.board_seq DESC
         <include refid="pagingBtm"/>
     </select>
 
@@ -35,4 +36,20 @@
 
 
     </insert>
+
+    <update id="updateReadCount" parameterType="int">
+        UPDATE ds_board SET read_count = read_count+1 WHERE board_seq = #{boardSeq}
+    </update>
+
+    <select id="getBoard" parameterType="int" resultType="BoardInfo">
+        SELECT board_seq
+             , board_title
+             , reg_id
+             , DATE_FORMAT(reg_dtm, '%Y/%m/%d') AS reg_dtm
+             , board_content
+             , file_path
+             , read_count
+        FROM ds_board
+        WHERE board_seq = #{boardSeq}
+    </select>
 </mapper>

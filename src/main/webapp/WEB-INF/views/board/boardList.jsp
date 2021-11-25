@@ -50,7 +50,7 @@
 
 
     <div id="boardContentArea"></div>
-    <input type="hidden" id="pageNo" value="0">
+    <input type="hidden" id="pageNo" value="1">
     <input type="hidden" id="pageSize" value="10">
     <div class="form-group">
         <div class="col-sm-offset-1 col-sm-13">

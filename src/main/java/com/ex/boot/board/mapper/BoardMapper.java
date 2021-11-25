@@ -10,4 +10,6 @@ public interface BoardMapper {
     List<BoardInfo> getBoardList(BoardInfo boardInfo);
     int getBoardTotalCount(BoardInfo boardInfo);
     int saveByBoard(BoardInfo boardInfo);
+    int updateReadCount(int boardSeq);
+    BoardInfo getBoard(int boardSeq);
 }

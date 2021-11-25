@@ -81,7 +81,20 @@
         </c:if>
 
         <c:if test="${not empty boardInfo}">
-
+            <div class="container mb-4">
+                <div class="form-group">
+                    <label for="regId" class="col-sm-2 control-label">아이디</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control input-large" name="regId" value="${boardInfo.regId}" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="boardTitle" class="col-sm-2 control-label">제목</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control input-large" name="boardTitle" value="${boardInfo.boardTitle}" data-minlength="2" required>
+                    </div>
+                </div>
+            </div>
         </c:if>
 </div>
 </body>

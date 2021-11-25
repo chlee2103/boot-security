@@ -11,7 +11,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <script>
     function fn_movePage(page){
-        $("#pageNo").val((page-1)*10);
+        $("#pageNo").val(page);
         fn_content();
     }
 </script>
@@ -40,7 +40,7 @@
             <c:forEach var="board" items="${boardList}">
                 <tr>
                     <td><c:out value="${board.rnum}"/></td>
-                    <td><c:out value="${board.boardTitle}"/></td>
+                    <td><a href="/board/boardDetail?boardSeq=${board.boardSeq}"><c:out value="${board.boardTitle}"/></a></td>
                     <td><c:out value="${board.regId}"/></td>
                     <td><c:out value="${board.regDtm}"/></td>
                     <td><c:out value="${board.readCount}"/></td>
@@ -51,8 +51,10 @@
     </table>
     <div class="text-center">
         <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="javascript:fn_movePage(${page.pageNo-1})">Previous</a></li>
-            <c:forEach begin="${page.firstPageNo}" end="${page.lastPageNo}" step="1" var="i">
+            <c:if test="${page.pageNo > 1}">
+                <li class="page-item"><a class="page-link" href="javascript:fn_movePage(${page.prevPageNo})">Previous</a></li>
+            </c:if>
+            <c:forEach begin="${page.startPageNo}" end="${page.endPageNo}" step="1" var="i">
                 <c:choose>
                     <c:when test="${i eq page.pageNo}">
                         <li class="page page_num"><a href="javascript:;" class="btn_paging"><strong>${i}</strong></a></li>
@@ -62,8 +64,9 @@
                     </c:otherwise>
                 </c:choose>
             </c:forEach>
-            <li class="page-item"><a class="page-link" href="javascript:fn_movePage(${page.pageNo+1})">Next</a></li>
-
+            <c:if test="${page.pageNo < page.lastPageNo}">
+                <li class="page-item"><a class="page-link" href="javascript:fn_movePage(${page.nextPageNo})">Next</a></li>
+            </c:if>
         </ul>
     </div>
 </div>
