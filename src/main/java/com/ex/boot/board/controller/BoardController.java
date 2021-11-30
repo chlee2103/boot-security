@@ -53,7 +53,7 @@ public class BoardController {
     @GetMapping("/boardDetail")
     public ModelAndView boardDetail(Principal principal, Integer boardSeq){
         ModelAndView mav = new ModelAndView("/board/boardDetail");
-        if(boardSeq != null || (!boardSeq.equals(""))){
+        if(boardSeq != null && (!boardSeq.equals(""))){
             BoardInfo boardInfo = boardService.getBoard(boardSeq);
             mav.addObject("boardInfo", boardInfo);
         }

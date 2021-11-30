@@ -13,7 +13,28 @@
     <script type="text/javascript">
         $(function (){
            $("#btnSubmit").click(function (){
+
                let flag = false;
+
+
+               if ( joins.lenCheck($("#userNick").val().trim())){
+                   alert('입력사항을 확인해주십시오.');
+                   return;
+               }else if($("#newUserPw").val() && (joins.passwordCheck($("#newUserPw").val().trim())
+                                               || joins.pwConfirmCheck($("#newUserPw").val().trim(), $("#userPwCheck").val().trim()))){
+                   alert('비밀번호 변경시 입력값을 확인하여 주십시오.');
+                   return;
+               }else if($("#newUserPhone").val() && joins.phoneCheck($("#newUserPhone").val())){
+                   alert('휴대폰번호를 확인해주십시오.');
+                   return;
+
+               }else {
+                   flag = true;
+                   alert('ok');
+               }
+
+
+               /*let flag = false;
 
                if (joins.emailCheck($("#userId").val().trim())
                    || joins.lenCheck($("#userName").val().trim())
@@ -47,7 +68,7 @@
                     }, (jqXhr)=> {
                         console.log(jqXhr);
                     });
-                }
+                }*/
            });
         });
 
@@ -62,13 +83,19 @@
         //패스워드는 6 ~ 20자 이내 영문 대,소문자, 숫자, 특수문자 혼합 입력
 
         function onChangeConfirm(obj, join, text) {
-            if(join($(obj).val().trim())) {
-                $(obj).siblings().text(text);
-                confirmFail(obj);
-                return true;
-            }else{
-                confirmSuccess(obj);
-                return false;
+            if($(obj).val().trim().length > 0){
+                if(join($(obj).val().trim())) {
+                    $(obj).siblings().text(text);
+                    confirmFail(obj);
+                    return true;
+                }else{
+                    confirmSuccess(obj);
+                    return false;
+                }
+            }else if($(obj).val().trim().length === 0){
+                $(obj).removeClass('is-invalid');
+                $(obj).removeClass('is-valid');
+                $(obj).siblings().text("");
             }
         }
         function onChagePwCfm(obj){
@@ -78,6 +105,64 @@
                 return true;
             }else {
                 confirmSuccess(obj);
+            }
+        }
+
+
+        /*// 비밀번호 재확인
+        function onChagePwCfm(){
+            let userPw = $("#newUserPw").val().trim();
+            let userPwCheck = $("#userPwCheck").val().trim();
+            if((userPw.length > 0 && userPwCheck.length > 0) || userPwCheck.length > 0) {
+                if (joins.pwConfirmCheck(userPwCheck, userPw)) {
+                    userPwCheck.siblings().text('비밀번호 재입력 항목은 비밀번호 항목과 동일하게 입력해 주세요.');
+                    userPwCheck.addClass('is-invalid');
+                    userPwCheck.siblings().addClass('invalid-feedback');
+                } else {
+                    userPwCheck.removeClass('is-invalid');
+                    userPwCheck.addClass('is-valid');
+                }
+            }
+            else if(userPw.length === 0 && userPwCheck.length === 0){
+                userPwCheck.removeClass('is-invalid');
+                userPwCheck.removeClass('is-valid');
+                userPwCheck.siblings().text('');
+            }
+
+        }
+
+        function onChagePwReCfm(){
+            if($("#userPwCheck").val().trim()){
+                onChagePwCfm();
+            }
+        }*/
+
+        // 비밀번호 재확인
+        function onChagePwCfm(){
+            let userPw = $("#newUserPw").val().trim();
+            let userPwCheck = $("#userPwCheck").val().trim();
+            if((userPw.length > 0 && userPwCheck.length > 0) || userPwCheck.length > 0) {
+                if (joins.pwConfirmCheck(userPwCheck, userPw)) {
+                    $("#userPwCheck").siblings('[name=guide_div]').text('비밀번호 재입력 항목은 비밀번호 항목과 동일하게 입력해 주세요.');
+                    $("#userPwCheck").addClass('is-invalid');
+                    $("#userPwCheck").siblings('[name=guide_div]').addClass('invalid-feedback');
+                } else {
+                    $("#userPwCheck").addClass('is-valid');
+                    $("#userPwCheck").removeClass('is-invalid');
+
+                }
+            }
+            else if((userPw.length === 0 && userPwCheck.length === 0) || userPwCheck.length === 0){
+                $("#userPwCheck").removeClass('is-invalid');
+                $("#userPwCheck").removeClass('is-valid');
+                $("#userPwCheck").siblings('[name=guide_div]').text('');
+            }
+
+        }
+
+        function onChagePwReCfm(){
+            if($("#userPwCheck").val().trim()){
+                onChagePwCfm();
             }
         }
 
@@ -122,33 +207,33 @@
                 <div class="form-group">
                     <label for="userNick" class="col-sm-2 control-label">닉네임</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" name="userNick" id="userNick" placeholder="닉네임" data-minlength="2" required
+                        <input type="text" class="form-control" name="userNick" id="userNick" placeholder="닉네임" data-minlength="2" required value="이초희"
                                onchange="onChangeConfirm(this, joins.lenCheck, '닉네임은 두글자 이상 입력해 주세요.' )">
                         <div></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="userPw" class="col-sm-2 control-label">비밀번호</label>
+                    <label for="newUserPw" class="col-sm-2 control-label">비밀번호</label>
                     <div class="col-sm-10">
-                        <input type="password" class="form-control input-large" name="userPw" id="userPw" placeholder="비밀번호" data-minlength="6" required
-                               onchange="onChangeConfirm(this, joins.passwordCheck, '비밀번호는 6 ~ 20자 이내 영문 대,소문자, 숫자, 특수문자 혼합 입력해주세요.')">
-                        <div></div>
+                        <input type="password" class="form-control input-large" name="newUserPw" id="newUserPw" placeholder="비밀번호" data-minlength="6" required
+                               onchange="onChangeConfirm(this, joins.passwordCheck, '비밀번호는 6 ~ 20자 이내 영문 대,소문자, 숫자, 특수문자 혼합 입력해주세요.'), onChagePwReCfm()">
+                        <div name="guide_div"></div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="pwCheck" class="col-sm-2 control-label">비밀번호 확인</label>
+                    <label for="userPwCheck" class="col-sm-2 control-label">비밀번호 확인</label>
                     <div class="col-sm-10">
-                        <input type="password" class="form-control input-large" name="pwCheck" id="pwCheck" placeholder="비밀번호확인" data-minlength="10" required
+                        <input type="password" class="form-control input-large" name="userPwCheck" id="userPwCheck" placeholder="비밀번호확인" data-minlength="10" required
                                onchange="onChagePwCfm(this)">
-                        <div></div>
+                        <div name="guide_div"></div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="userPhone" class="col-sm-2 control-label">휴대폰</label>
+                    <label for="newUserPhone" class="col-sm-2 control-label">휴대폰</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control input-large" name="userPhone" id="userPhone" placeholder="전화번호 예)01011111111" onkeyup="joins.phoneKeyup(this)"
-                               onchange="onChangeConfirm(this, joins.phoneCheck, '휴대폰 형식으로 입력해 주세요.')" maxlength="11">
+                        <input type="text" class="form-control input-large" name="newUserPhone" id="newUserPhone" placeholder="전화번호 예)01011111111" onkeyup="joins.phoneKeyup(this)"
+                               onchange="onChangeConfirm(this, joins.phoneCheck, '휴대폰 형식으로 입력해 주세요.')" maxlength="13">
                         <div></div>
                     </div>
                 </div>

@@ -175,9 +175,7 @@ public class PageNation implements Serializable {
         // 기본값 설정 (들어오는 값이 없을 경우)
         if (this.totalCount == 0) return;
 
-        if (this.pageNo == 1) {
-            this.startNo = 0;
-        }
+
         else {
             this.startNo = (this.pageNo - 1) * 10;
         }
@@ -187,6 +185,14 @@ public class PageNation implements Serializable {
         finalPage = (this.totalCount % this.pageSize) == 0 ? finalPage : finalPage + 1;
         this.firstPageNo = 1;
         this.lastPageNo = finalPage;
+
+        if(this.pageNo > this.lastPageNo){ // 디테일뷰에서 목록 이동시 글삭제 할 경우 해당 pageNo가 사라졌을 경우 pageNo를 마지막 페이지로
+            this.pageNo = this.lastPageNo;
+        }
+
+        if (this.pageNo == 1) {
+            this.startNo = 0;
+        }
 
         // [이전], [다음]
         this.prevPageNo = ((this.pageNo - 1) < 1 ? 1 : (this.pageNo - 1)); // pageNo - 1가 0일 경우 1이고 아니면 pageNo - 1

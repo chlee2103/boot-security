@@ -55,6 +55,11 @@
             )
         }
     </script>
+    <style>
+        .form-group {
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
 <jsp:include page="../layouts/top.jsp"/>
@@ -63,38 +68,52 @@
         <c:if test="${empty boardInfo}">
 
         <div class="container mb-4">
-                <div class="form-group">
-                    <label for="regId" class="col-sm-2 control-label">아이디</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control input-large" name="regId" id="regId" value="${principal.name}" readonly>
-                    </div>
+            <div class="form-group">
+                <label for="regId" class="col-sm-2 control-label">아이디</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control input-large" name="regId" id="regId" value="${principal.name}" readonly>
                 </div>
-                <div class="form-group">
-                    <label for="boardTitle" class="col-sm-2 control-label">제목</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control input-large" name="boardTitle" id="boardTitle" data-minlength="2" required>
-                    </div>
+            </div>
+            <div class="form-group">
+                <label for="boardTitle" class="col-sm-2 control-label">제목</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control input-large" name="boardTitle" id="boardTitle" data-minlength="2" required>
                 </div>
+            </div>
+            <div class="form-group">
+                <textarea class="summernote" id="boardContent"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-lg btn-success float-right" id="btnWrite">글쓰기</button>
+            </div>
         </div>
-        <textarea class="summernote" id="boardContent"></textarea>
-        <button type="button"  class="btn btn-lg btn-success float-right" id="btnWrite">글쓰기</button>
         </c:if>
 
         <c:if test="${not empty boardInfo}">
             <div class="container mb-4">
-                <div class="form-group">
-                    <label for="regId" class="col-sm-2 control-label">아이디</label>
-                    <div class="col-sm-10">
+                <div class="row-cols-lg-6 form-group">
+                    <div class="col-lg-2">
+                        <label for="regId" class="control-label">아이디</label>
+                    </div>
+                    <div class="col-lg-10">
                         <input type="text" class="form-control input-large" name="regId" value="${boardInfo.regId}" readonly>
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-3">
                     <label for="boardTitle" class="col-sm-2 control-label">제목</label>
                     <div class="col-sm-10">
                         <input type="text" class="form-control input-large" name="boardTitle" value="${boardInfo.boardTitle}" data-minlength="2" required>
                     </div>
                 </div>
-            </div>
+                <div class="form-group mt-3 border">
+                    <p><c:out value="${boardInfo.boardTitle}"/></p>
+                </div>
+                <c:if test="${principal.name eq boardInfo.regId}">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-lg btn-success float-right" id="btnUpdate">수정</button>
+                        <button type="button" class="btn btn-lg btn-dark float-right  mr-2" id="btnDelete">삭제</button>
+                    </div>
+                </c:if>
         </c:if>
 </div>
 </body>
